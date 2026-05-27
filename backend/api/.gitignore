@@ -1,5 +1,8 @@
 HELP.md
 target/
+
+### RSA Keys ###
+src/main/resources/keys/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
