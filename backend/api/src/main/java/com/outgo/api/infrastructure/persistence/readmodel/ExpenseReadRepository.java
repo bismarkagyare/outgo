@@ -10,58 +10,92 @@ import java.util.UUID;
 @Repository
 public class ExpenseReadRepository {
 
-    private final JdbcClient jdbcClient;
+  private final JdbcClient jdbcClient;
 
-    public ExpenseReadRepository(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
+  public ExpenseReadRepository(JdbcClient jdbcClient) {
+    this.jdbcClient = jdbcClient;
+  }
 
-    public List<ExpenseSummaryDto> findMonthlyExpenses(UUID userId, int year, int month) {
-        return jdbcClient.sql("""
-                SELECT id, amount, currency, category, description,
-                       expense_date, created_at, updated_at
-                FROM expenses
-                WHERE user_id    = :userId
-                  AND deleted_at IS NULL
-                  AND EXTRACT(YEAR  FROM expense_date) = :year
-                  AND EXTRACT(MONTH FROM expense_date) = :month
-                ORDER BY expense_date DESC
-                """)
-                .param("userId", userId)
-                .param("year", year)
-                .param("month", month)
-                .query((rs, rowNum) -> new ExpenseSummaryDto(
-                        rs.getObject("id", UUID.class),
-                        rs.getBigDecimal("amount"),
-                        rs.getString("currency"),
-                        rs.getString("category"),
-                        rs.getString("description"),
-                        rs.getTimestamp("expense_date").toInstant(),
-                        rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant()))
-                .list();
-    }
+  public List<ExpenseSummaryDto> findMonthlyExpenses(UUID userId, int year, int month) {
+    return jdbcClient.sql("""
+        SELECT id, amount, currency, category, description,
+               expense_date, created_at, updated_at
+        FROM expenses
+        WHERE user_id    = :userId
+          AND deleted_at IS NULL
+          AND EXTRACT(YEAR  FROM expense_date) = :year
+          AND EXTRACT(MONTH FROM expense_date) = :month
+        ORDER BY expense_date DESC
+        """)
+        .param("userId", userId)
+        .param("year", year)
+        .param("month", month)
+        .query((rs, rowNum) -> new ExpenseSummaryDto(
+            rs.getObject("id", UUID.class),
+            rs.getBigDecimal("amount"),
+            rs.getString("currency"),
+            rs.getString("category"),
+            rs.getString("description"),
+            rs.getTimestamp("expense_date").toInstant(),
+            rs.getTimestamp("created_at").toInstant(),
+            rs.getTimestamp("updated_at").toInstant()))
+        .list();
+  }
 
-    public Optional<ExpenseSummaryDto> findById(UUID id, UUID userId) {
-        return jdbcClient.sql("""
-                SELECT id, amount, currency, category, description,
-                       expense_date, created_at, updated_at
-                FROM expenses
-                WHERE id      = :id
-                  AND user_id = :userId
-                  AND deleted_at IS NULL
-                """)
-                .param("id", id)
-                .param("userId", userId)
-                .query((rs, rowNum) -> new ExpenseSummaryDto(
-                        rs.getObject("id", UUID.class),
-                        rs.getBigDecimal("amount"),
-                        rs.getString("currency"),
-                        rs.getString("category"),
-                        rs.getString("description"),
-                        rs.getTimestamp("expense_date").toInstant(),
-                        rs.getTimestamp("created_at").toInstant(),
-                        rs.getTimestamp("updated_at").toInstant()))
-                .optional();
-    }
+  public Optional<ExpenseSummaryDto> findById(UUID id, UUID userId) {
+    return jdbcClient.sql("""
+        SELECT id, amount, currency, category, description,
+               expense_date, created_at, updated_at
+        FROM expenses
+        WHERE id      = :id
+          AND user_id = :userId
+          AND deleted_at IS NULL
+        """)
+        .param("id", id)
+        .param("userId", userId)
+        .query((rs, rowNum) -> new ExpenseSummaryDto(
+            rs.getObject("id", UUID.class),
+            rs.getBigDecimal("amount"),
+            rs.getString("currency"),
+            rs.getString("category"),
+            rs.getString("description"),
+            rs.getTimestamp("expense_date").toInstant(),
+            rs.getTimestamp("created_at").toInstant(),
+            rs.getTimestamp("updated_at").toInstant()))
+        .optional();
+  }
+
+  public java.math.BigDecimal sumByUserAndMonth(UUID userId, int year, int month) {
+    return jdbcClient.sql("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM expenses
+        WHERE user_id    = :userId
+          AND deleted_at IS NULL
+          AND EXTRACT(YEAR  FROM expense_date) = :year
+          AND EXTRACT(MONTH FROM expense_date) = :month
+        """)
+        .param("userId", userId)
+        .param("year", year)
+        .param("month", month)
+        .query(java.math.BigDecimal.class)
+        .single();
+  }
+
+  public java.math.BigDecimal sumByUserAndMonthAndCategory(UUID userId, int year, int month, String category) {
+    return jdbcClient.sql("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM expenses
+        WHERE user_id    = :userId
+          AND deleted_at IS NULL
+          AND category   = :category
+          AND EXTRACT(YEAR  FROM expense_date) = :year
+          AND EXTRACT(MONTH FROM expense_date) = :month
+        """)
+        .param("userId", userId)
+        .param("year", year)
+        .param("month", month)
+        .param("category", category)
+        .query(java.math.BigDecimal.class)
+        .single();
+  }
 }

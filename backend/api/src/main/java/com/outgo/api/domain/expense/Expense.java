@@ -125,6 +125,7 @@ public class Expense extends AggregateRoot {
                 newCategory,
                 oldDescription,
                 newDescription,
+                newExpenseDate,
                 this.updatedAt));
     }
 
