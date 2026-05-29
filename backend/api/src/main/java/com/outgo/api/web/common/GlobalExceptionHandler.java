@@ -3,6 +3,7 @@ package com.outgo.api.web.common;
 import com.outgo.api.domain.budget.BudgetExceededException;
 import com.outgo.api.domain.budget.BudgetNotFoundException;
 import com.outgo.api.domain.expense.ExpenseNotFoundException;
+import com.outgo.api.domain.expense.RecurringExpenseNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,6 +25,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BudgetNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiErrorResponse handleBudgetNotFound(BudgetNotFoundException ex) {
+        return ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(RecurringExpenseNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiErrorResponse handleRecurringExpenseNotFound(RecurringExpenseNotFoundException ex) {
         return ApiErrorResponse.of(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     }
 
