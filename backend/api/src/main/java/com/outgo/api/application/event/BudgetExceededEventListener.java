@@ -6,6 +6,7 @@ import com.outgo.api.domain.expense.ExpenseUpdatedEvent;
 import com.outgo.api.infrastructure.persistence.readmodel.BudgetReadRepository;
 import com.outgo.api.infrastructure.persistence.readmodel.BudgetSummaryDto;
 import com.outgo.api.infrastructure.persistence.readmodel.ExpenseReadRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -18,11 +19,14 @@ public class BudgetExceededEventListener {
 
     private final BudgetReadRepository budgetReadRepository;
     private final ExpenseReadRepository expenseReadRepository;
+    private final MeterRegistry meterRegistry;
 
     public BudgetExceededEventListener(BudgetReadRepository budgetReadRepository,
-            ExpenseReadRepository expenseReadRepository) {
+            ExpenseReadRepository expenseReadRepository,
+            MeterRegistry meterRegistry) {
         this.budgetReadRepository = budgetReadRepository;
         this.expenseReadRepository = expenseReadRepository;
+        this.meterRegistry = meterRegistry;
     }
 
     @EventListener
@@ -62,6 +66,8 @@ public class BudgetExceededEventListener {
 
     private void throwExceeded(UUID userId, int year, int month, String category,
             BigDecimal spent, BudgetSummaryDto budget) {
+        meterRegistry.counter("budget.exceeded",
+                "category", category != null ? category : "overall").increment();
         throw new BudgetExceededException(
                 userId, year, month,
                 category == null ? null
