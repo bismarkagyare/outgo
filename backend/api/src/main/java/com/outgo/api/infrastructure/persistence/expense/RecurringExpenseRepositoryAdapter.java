@@ -1,17 +1,18 @@
 package com.outgo.api.infrastructure.persistence.expense;
 
-import com.outgo.api.domain.expense.Category;
-import com.outgo.api.domain.expense.Frequency;
-import com.outgo.api.domain.expense.RecurringExpense;
-import com.outgo.api.domain.expense.RecurringExpenseId;
-import com.outgo.api.domain.expense.RecurringExpenseRepository;
-import com.outgo.api.domain.shared.Money;
-import org.springframework.stereotype.Repository;
-
+//import com.outgo.api.domain.expense.Category;
+//import com.outgo.api.domain.expense.Frequency;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.stereotype.Repository;
+
+import com.outgo.api.domain.expense.RecurringExpense;
+import com.outgo.api.domain.expense.RecurringExpenseId;
+import com.outgo.api.domain.expense.RecurringExpenseRepository;
+import com.outgo.api.domain.shared.Money;
 
 @Repository
 public class RecurringExpenseRepositoryAdapter implements RecurringExpenseRepository {
